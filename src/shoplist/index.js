@@ -176,18 +176,23 @@ function tryConvert(temperature,convert){
     const rounded = Math.round(output * 1000) /1000;
     return rounded.toString();
 }
+// 温度输入组件
 class TemperatureInput extends Component{
     constructor(props){
         super(props)
+        // 保存当前页面的template
         this.state = {temperature : ''}
     }
     handleChange(e){
-        this.setState({
-            temperature:e.target.value
-        })
+        // this.setState({
+        //     temperature:e.target.value
+        // })
+        this.props.onTemperatureChange(e.target.value)
     }
     render(){
-        const temperature = this.state.temperature;
+        // const temperature = this.state.temperature;
+        const temperature = this.props.temperature;
+       
         const scale = this.props.scale;
         return (
             <div>
@@ -199,12 +204,39 @@ class TemperatureInput extends Component{
         )
     }
 }
+// 父级组件
 class TemplateGrop extends Component{
+    constructor(props){
+        super(props)
+        this.state = { temperature:'',scale:'' }
+    }
+    handleCelsiusChange(temperature){
+        console.log(temperature);
+        this.setState({scale:'c',temperature})
+    }
+    handleFahrenheitChange(temperature){
+        console.log(temperature);
+        this.setState({scale:'f',temperature})
+    }
     render(){
+        const scale = this.state.scale;
+        const temperature = this.state.temperature;
+        const celsius = scale === 'f' ? tryConvert(temperature,toCel) : temperature;
+        const faherenheit = scale === 'c' ? tryConvert(temperature,toHrea) : temperature;
+       
         return (
             <div>
-                <TemperatureInput scale='c'/>
-                <TemperatureInput scale='f'/>
+                <TemperatureInput 
+                scale='c'
+                temperature = {celsius}
+                onTemperatureChange={(e) => this.handleCelsiusChange(e)}
+                />
+                <TemperatureInput 
+                scale='f'
+                temerature = { faherenheit }
+                onTemperatureChange = {(e) => {this.handleFahrenheitChange(e)}}
+                />
+                <BoilingVerdict celsius={parseFloat(celsius)}/>
             </div>
         )
     }
@@ -233,7 +265,6 @@ class ShopList extends Component {
                     <li>WhatsApp</li>
                     <li>Oculus</li>
                 </ul>
-
                 <button onClick={() => { this.handleChange() }}> 切换状态 </button>
                 <GettingGrop isLogin={this.state.isShow} />
                 <ListRender />
